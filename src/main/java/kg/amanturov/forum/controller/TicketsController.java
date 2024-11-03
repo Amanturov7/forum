@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tickets")
+@RequestMapping("/rest/ticket")
 public class TicketsController {
 
     private final TicketsService ticketsService;
@@ -20,7 +20,7 @@ public class TicketsController {
         this.ticketsService = ticketsService;
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<TicketsResponseDto> createTicket(@RequestBody TicketsRequestDto requestDto) {
         return ResponseEntity.ok(ticketsService.createTicket(requestDto));
     }
@@ -31,8 +31,8 @@ public class TicketsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TicketsResponseDto> getTicketById(@PathVariable Long id) {
-        TicketsResponseDto ticket = ticketsService.getTicketById(id);
+    public ResponseEntity<TicketsResponseDto> getTicketById(@PathVariable Long id, @RequestParam(name = "userId") Long userId) {
+        TicketsResponseDto ticket = ticketsService.getTicketById(id,userId);
         return ticket != null ? ResponseEntity.ok(ticket) : ResponseEntity.notFound().build();
     }
 

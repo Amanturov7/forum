@@ -13,4 +13,11 @@ public class TicketsResponseDto {
     private Boolean isArchived;
     private Timestamp createdDate;
     private Timestamp updateDate;
+    private Long categoryTypeId;
+    private Long ticketTypeId;
+
+    private Long commentCount;
+    private Long likeCount;
+    private Long repostCount;
+    private Boolean isLikedByCurrentUser;
 }

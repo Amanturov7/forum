@@ -54,10 +54,7 @@ public class EmailServiceImpl implements EmailService {
         MimeMessage mimeMessage
                 = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper;
-
         try {
-
-
             mimeMessageHelper
                     = new MimeMessageHelper(mimeMessage, true);
             mimeMessageHelper.setFrom(sender);
@@ -76,9 +73,7 @@ public class EmailServiceImpl implements EmailService {
             javaMailSender.send(mimeMessage);
             return "Mail sent Successfully";
         }
-
         catch (MessagingException e) {
-
             return "Error while sending mail!!!";
         }
     }

@@ -9,6 +9,7 @@ public interface CommentService {
 
     CommentResponseDto addComment(Long ticketId, CommentRequestDto requestDto);
 
+
     List<CommentResponseDto> getCommentsByTicket(Long ticketId);
 
     void deleteComment(Long commentId, Long userId);

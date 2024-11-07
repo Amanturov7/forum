@@ -37,6 +37,9 @@ public class Tickets extends BaseModel {
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "tickets", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Attachments> attachments = new ArrayList<>();
+
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
 

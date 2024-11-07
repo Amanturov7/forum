@@ -13,8 +13,8 @@ public class AttachmentResponseDto {
     private String name;
     private String downloadUrl;
     private Long userId;
-//    private Long appicationsId;
-//    private Long ticketsId;
+    private Long ticketsId;
+    private Long commentId;
 //    private Long reviewsId;
     private Resource file;
     private String description;

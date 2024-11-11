@@ -1,6 +1,7 @@
 package kg.amanturov.forum.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import kg.amanturov.forum.exception.MyFileNotFoundException;
 import kg.amanturov.forum.exception.NotFoundException;
 import kg.amanturov.forum.exception.ServerErrorException;
 import org.springframework.http.HttpStatus;
@@ -24,12 +25,18 @@ public class AdviceController {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("server error: " + ex.getMessage());
     }
 
     @ExceptionHandler(JsonProcessingException.class)
     public ResponseEntity<String> handleJsonProcessingException(JsonProcessingException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Json mapping error: " + ex.getMessage());
     }
+
+    @ExceptionHandler(MyFileNotFoundException.class)
+    public ResponseEntity<String> handleMyFileNotFoundException(MyFileNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
 
 }

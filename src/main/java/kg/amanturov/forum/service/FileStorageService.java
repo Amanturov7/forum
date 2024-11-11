@@ -23,6 +23,27 @@ public interface FileStorageService {
 //    AttachmentResponseDto findByTicketsId(Long id);
 
 
+    AttachmentResponseDto findByComment(Long id);
+
+    //    @Override
+    //    public AttachmentResponseDto findByReviewsId(Long id) {
+    //        Attachments Attachment = repository.findByReviewsId(id);
+    //
+    //        if (Attachment != null) {
+    //            AttachmentResponseDto responseDto = mapToAttachmentResponseDto(Attachment);
+    //            String sanitizedFileName = responseDto.getName();
+    //            sanitizedFileName = sanitizedFileName.replaceAll("[^a-zA-Z0-9.-]", "_");
+    //            responseDto.setDownloadUrl("http://localhost:8080/rest/attachment/download/" + responseDto.getAttachmentId());
+    //            responseDto.setName(sanitizedFileName);
+    //            return responseDto;
+    //        } else {
+    //            return null;
+    //        }
+    //    }
+    //
+    //
+    AttachmentResponseDto findByTicketsId(Long id);
+
     AttachmentResponseDto findByUserId(Long id);
 
     AttachmentResponseDto findByUserIdAndType(Long id);
@@ -31,6 +52,10 @@ public interface FileStorageService {
 
 
 //    void deleteByApplicationsId(Long id);
+
+    void deleteByTicketsId(Long id);
+
+    void deleteByCommentId(Long id);
 
     AttachmentResponseDto getAttachmentById(Long id);
 

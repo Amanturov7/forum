@@ -4,8 +4,12 @@ package kg.amanturov.forum.service;
 import kg.amanturov.forum.dto.AttachmentRequestDto;
 import kg.amanturov.forum.dto.AttachmentResponseDto;
 import kg.amanturov.forum.exception.MyFileNotFoundException;
+import kg.amanturov.forum.exception.ServerErrorException;
 import kg.amanturov.forum.model.Attachments;
+import kg.amanturov.forum.model.Tickets;
 import kg.amanturov.forum.repository.AttachmentRepository;
+import kg.amanturov.forum.repository.CommentRepository;
+import kg.amanturov.forum.repository.TicketsRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -30,9 +34,11 @@ import java.util.stream.Stream;
 public class FileStorageServiceImpl implements FileStorageService {
 
     private final AttachmentRepository repository;
-    private final UserService userService;
+    private final TicketsRepository ticketsRepository;
 
-    private final CommonReferenceService commonReferenceService;
+    private final UserService userService;
+    private final CommentRepository commentRepository;
+
 
 
 
@@ -41,10 +47,11 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Value("${file.storage.videos}")
     private String videoDirectory;
 
-    public FileStorageServiceImpl(AttachmentRepository repository, UserService userService, CommonReferenceService commonReferenceService) {
+    public FileStorageServiceImpl(AttachmentRepository repository, TicketsRepository ticketsRepository, UserService userService, CommentRepository commentRepository) {
         this.repository = repository;
+        this.ticketsRepository = ticketsRepository;
         this.userService = userService;
-        this.commonReferenceService = commonReferenceService;
+        this.commentRepository = commentRepository;
     }
 
 
@@ -93,38 +100,38 @@ public class FileStorageServiceImpl implements FileStorageService {
 //        }
 //    }
 
-//    @Override
-//    public AttachmentResponseDto findByReviewsId(Long id) {
-//        Attachments Attachment = repository.findByReviewsId(id);
-//
-//        if (Attachment != null) {
-//            AttachmentResponseDto responseDto = mapToAttachmentResponseDto(Attachment);
-//            String sanitizedFileName = responseDto.getName();
-//            sanitizedFileName = sanitizedFileName.replaceAll("[^a-zA-Z0-9.-]", "_");
-//            responseDto.setDownloadUrl("http://localhost:8080/rest/attachment/download/" + responseDto.getAttachmentId());
-//            responseDto.setName(sanitizedFileName);
-//            return responseDto;
-//        } else {
-//            return null;
-//        }
-//    }
-//
-//
-//    @Override
-//    public AttachmentResponseDto findByTicketsId(Long id) {
-//        Attachments Attachment = repository.findByTicketsId(id);
-//
-//        if (Attachment != null) {
-//            AttachmentResponseDto responseDto = mapToAttachmentResponseDto(Attachment);
-//            String sanitizedFileName = responseDto.getName();
-//            sanitizedFileName = sanitizedFileName.replaceAll("[^a-zA-Z0-9.-]", "_");
-//            responseDto.setDownloadUrl("http://localhost:8080/rest/attachment/download/" + responseDto.getAttachmentId());
-//            responseDto.setName(sanitizedFileName);
-//            return responseDto;
-//        } else {
-//            return null;
-//        }
-//    }
+    @Override
+    public AttachmentResponseDto findByComment(Long id) {
+        Attachments Attachment = repository.findByCommentId(id);
+
+        if (Attachment != null) {
+            AttachmentResponseDto responseDto = mapToAttachmentResponseDto(Attachment);
+            String sanitizedFileName = responseDto.getName();
+            sanitizedFileName = sanitizedFileName.replaceAll("[^a-zA-Z0-9.-]", "_");
+            responseDto.setDownloadUrl("http://localhost:8080/rest/attachment/download/" + responseDto.getAttachmentId());
+            responseDto.setName(sanitizedFileName);
+            return responseDto;
+        } else {
+            return null;
+        }
+    }
+
+
+    @Override
+    public AttachmentResponseDto findByTicketsId(Long id) {
+        Attachments Attachment = repository.findByTicketsId(id);
+
+        if (Attachment != null) {
+            AttachmentResponseDto responseDto = mapToAttachmentResponseDto(Attachment);
+            String sanitizedFileName = responseDto.getName();
+            sanitizedFileName = sanitizedFileName.replaceAll("[^a-zA-Z0-9.-]", "_");
+            responseDto.setDownloadUrl("http://localhost:8080/rest/attachment/download/" + responseDto.getAttachmentId());
+            responseDto.setName(sanitizedFileName);
+            return responseDto;
+        } else {
+            return null;
+        }
+    }
 
     @Override
     public AttachmentResponseDto findByUserId(Long id) {
@@ -179,8 +186,8 @@ public class FileStorageServiceImpl implements FileStorageService {
         responseDto.setName(fileName);
 //        responseDto.setAppicationsId(dto.getApplicationsId());
         responseDto.setUserId(dto.getUserProfileId());
-//        responseDto.setTicketsId(dto.getTicketsId());
-//        responseDto.setReviewsId(dto.getReviewsId());
+        responseDto.setTicketsId(dto.getTicketsId());
+        responseDto.setCommentId(dto.getCommentId());
         responseDto.setDescription(dto.getDescription());
         responseDto.setOriginName(dto.getOriginName());
         Attachments attachments = convertDtoToEntity(responseDto);
@@ -231,36 +238,51 @@ public class FileStorageServiceImpl implements FileStorageService {
         responseDto.setExtension(attachment.getExtension());
         responseDto.setName(attachment.getName());
 
-//        if(attachment.getTickets() != null ){
-//            responseDto.setTicketsId(attachment.getTickets().getId());
-//        }
-//        responseDto.setAttachmentId(attachment.getId());
-//        if(attachment.getUser() != null) {
-//            responseDto.setUserId(attachment.getUser().getId());
-//        }
-//        if(attachment.getApplications() != null) {
-//            responseDto.setAppicationsId(attachment.getApplications().getId());
-//        }
-//        if(attachment.getReviews() != null) {
-//            responseDto.setReviewsId(attachment.getReviews().getId());
-//        }
+        if(attachment.getTickets() != null ){
+            responseDto.setTicketsId(attachment.getTickets().getId());
+        }
+        responseDto.setAttachmentId(attachment.getId());
+        if(attachment.getUser() != null) {
+            responseDto.setUserId(attachment.getUser().getId());
+        }
+        if(attachment.getComment() != null) {
+            responseDto.setCommentId(attachment.getComment().getId());
+        }
+
         return responseDto;
     }
 
-//@Override
-//    public void deleteByApplicationsId(Long id) {
-//        Attachments attachment = repository.findByApplicationsId(id);
-//
-//        if (attachment == null) {
-//            throw new MyFileNotFoundException("Attachment not found for application ID: " + id);
-//        }
-//        try {
-//            Files.delete(Paths.get(attachment.getPath()));
-//            deleteAttachmentById(attachment.getId());
-//        } catch (IOException e) {
-//            throw new RuntimeException("Error deleting attachment file: " + e.getMessage());
-//        }
-//    }
+
+    @Override
+    public void deleteByTicketsId(Long id) {
+        Attachments attachment = repository.findByTicketsId(id);
+
+        if (attachment == null) {
+            throw new MyFileNotFoundException("photo not found for ticket ID: " + id);
+        }
+        try {
+            Files.delete(Paths.get(attachment.getPath()));
+            deleteAttachmentById(attachment.getId());
+        } catch (IOException e) {
+            throw new ServerErrorException("Error deleting photo of ticket Id: " + id+ ", : " + e.getMessage());
+        }
+    }
+
+
+    @Override
+    public void deleteByCommentId(Long id) {
+        Attachments attachment = repository.findByCommentId(id);
+
+        if (attachment == null) {
+            throw new MyFileNotFoundException("photo not found for comment ID: " + id);
+        }
+        try {
+            Files.delete(Paths.get(attachment.getPath()));
+            deleteAttachmentById(attachment.getId());
+        } catch (IOException e) {
+            throw new ServerErrorException("Error deleting photo of comment Id: " + id+ ", : " + e.getMessage());
+        }
+    }
 
 
     @Override
@@ -274,15 +296,15 @@ public class FileStorageServiceImpl implements FileStorageService {
             responseDto.setDescription(attachment.getDescription());
             responseDto.setOriginName(attachment.getName());
             responseDto.setExtension(attachment.getExtension());
-//            if(attachment.getTickets() != null ){
-//                responseDto.setTicketsId(attachment.getTickets().getId());
-//            }
-//            if(attachment.getUser() != null) {
-//                responseDto.setUserId(attachment.getUser().getId());
-//            }
-//            if(attachment.getApplications() != null) {
-//                responseDto.setAppicationsId(attachment.getApplications().getId());
-//            }
+            if(attachment.getTickets() != null ){
+                responseDto.setTicketsId(attachment.getTickets().getId());
+            }
+            if(attachment.getUser() != null) {
+                responseDto.setUserId(attachment.getUser().getId());
+            }
+            if(attachment.getComment() != null) {
+                responseDto.setCommentId(attachment.getComment().getId());
+            }
             responseDto.setName(attachment.getName());
             return responseDto;
         } else {
@@ -298,7 +320,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
             String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
             if (!extension.toLowerCase().matches("jpg|jpeg|png")) {
-                throw new IllegalArgumentException("Недопустимый формат файла для аватарки: " + extension);
+                throw new IllegalArgumentException("invalid type of file, use [jpg, jpeg, png]: " + extension);
             }
 
             String fileName = "avatar_" + userId + "." + extension;
@@ -314,7 +336,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             attachment.setDescription("User Avatar");
             repository.save(attachment);
         } catch (IOException ex) {
-            throw new RuntimeException("Ошибка при сохранении аватарки: " + ex.getMessage());
+            throw new ServerErrorException("Failed to save avatar file " + ex.getMessage());
         }
     }
 
@@ -334,7 +356,7 @@ public class FileStorageServiceImpl implements FileStorageService {
                 Path filePath = Paths.get(currentAvatar.getPath());
                 Files.deleteIfExists(filePath);
             } catch (IOException ex) {
-                throw new RuntimeException("Failed to delete avatar file: " + ex.getMessage());
+                throw new ServerErrorException("Failed to delete avatar file: " + ex.getMessage());
             }
 
             repository.delete(currentAvatar);
@@ -357,17 +379,17 @@ public class FileStorageServiceImpl implements FileStorageService {
         attachments.setPath(responseDto.getFilePath());
         attachments.setDescription(responseDto.getDescription());
 
-//        if (responseDto.getTicketsId() != null) {
-//            Optional<Tickets> ticketsOptional = ticketsRepository.findById(responseDto.getTicketsId());
-//            ticketsOptional.ifPresent(attachments::setTickets);
-//        }
-//
-//        if(responseDto.getUserId() != null) {
-//            attachments.setUser(userService.findById(responseDto.getUserId()));
-//        }
-//        if(responseDto.getAppicationsId() != null) {
-//            attachments.setApplications(applicationsService.findById(responseDto.getAppicationsId()));
-//        }
+        if (responseDto.getTicketsId() != null) {
+            Optional<Tickets> ticketsOptional =ticketsRepository.findById(responseDto.getTicketsId());
+            ticketsOptional.ifPresent(attachments::setTickets);
+        }
+
+        if(responseDto.getUserId() != null) {
+            attachments.setUser(userService.findById(responseDto.getUserId()));
+        }
+        if(responseDto.getCommentId() != null) {
+            attachments.setComment(commentRepository.findById(responseDto.getCommentId()).orElse(null));
+        }
 //        if(responseDto.getReviewsId() != null) {
 //            attachments.setReviews(reviewService.findById(responseDto.getReviewsId()));
 //        }
@@ -381,15 +403,15 @@ public class FileStorageServiceImpl implements FileStorageService {
         responseDto.setFilePath(attachments.getPath());
         responseDto.setAttachmentId(attachments.getId());
         responseDto.setDescription(attachments.getDescription());
-//        if(attachments.getTickets() != null ){
-//            responseDto.setTicketsId(attachments.getTickets().getId());
-//        }
-//        if(attachments.getUser() != null) {
-//            responseDto.setUserId(attachments.getUser().getId());
-//        }
-//        if(attachments.getApplications() != null) {
-//            responseDto.setAppicationsId(attachments.getApplications().getId());
-//        }
+        if(attachments.getTickets() != null ){
+            responseDto.setTicketsId(attachments.getTickets().getId());
+        }
+        if(attachments.getUser() != null) {
+            responseDto.setUserId(attachments.getUser().getId());
+        }
+        if(attachments.getComment() != null) {
+            responseDto.setCommentId(attachments.getComment().getId());
+        }
         return responseDto;
     }
 
@@ -417,10 +439,10 @@ public class FileStorageServiceImpl implements FileStorageService {
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {
-                throw new RuntimeException("Could not read the file!");
+                throw new ServerErrorException("Could not read the file!");
             }
         } catch (MalformedURLException e) {
-            throw new RuntimeException("Error: " + e.getMessage());
+            throw new ServerErrorException("Error: " + e.getMessage());
         }
     }
 
